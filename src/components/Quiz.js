@@ -1,8 +1,9 @@
-import React, { useState, useEffect,useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Navbar from './Navbar';
 import Coursebar from './Coursebar';
 import '../quiz.css'; 
+import studentGivingExam from '../images/student-giving-exam-4064797-3363987.png';
 
   const questions = [
               {
@@ -57,194 +58,190 @@ import '../quiz.css';
               }
         ];
 
-const QuizComponent = ({ question, options, onOptionSelect, onNextClick }) => (
-  <div>
-    {/* Your existing HTML for the quiz component */}
-    <h4>{question}</h4>
-    {/* Render options and handle option selection */}
-    {options.map((option, index) => (
-      <div key={index}>
-        <input
-          type="radio"
-          name="answer options-outlined"
-          id={`option${index}`}
-          value={index}
-          onChange={() => onOptionSelect(index)}
-        />
-        <label htmlFor={`option${index}`} className="btn btn-outline-success">
-          {option}
-        </label>
-      </div>
-    ))}
-    {/* Button to proceed to the next question */}
-    <button onClick={onNextClick}>Save & Next</button>
-  </div>
-);
 
-const ScoreComponent = ({ scoreInfo }) => {
-  return (
-    <div>
-      {/* Your existing HTML for the score component */}
-      <h3>Your Score</h3>
-      <p>Attempted Questions: {scoreInfo.attemptedQuestions}</p>
-      <p>Your Score: {scoreInfo.score}</p>
-    </div>
-  );
-}
+
+const Quiz = () => {
+    const [currentQuestion, setCurrentQuestion] = useState(0);
+    const [timer, setTimer] = useState(10);
+    const [timerInterval, setTimerInterval] = useState(null);
+    const [score, setScore] = useState(0);
+    const [quizStarted, setQuizStarted] = useState(false);
+    const [unattempted, setUnattempted] = useState(10);
+    const [showScorebox, setShowScorebox] = useState(false);
+        
+    const startQuiz = () => {
+        setQuizStarted(true);
+        loadQuestion();
+        startTimer();
+    };
+        
+    const endQuiz = useCallback(() => {
+        clearInterval(timerInterval);
+        setTimer(-2);
+        setShowScorebox(true);
+    },[timerInterval]);
+        
+    const loadQuestion = useCallback(() => {
+      const question = questions[currentQuestion];
+  
+      const options = question.options.map((option, index) => (
+          <div key={index} className="form-check">
+              <input className="button-check" type="radio" name="answer options-outlined" id={`option${index}`} value={index} />
+              <label className="btn btn-outline-success" htmlFor={`option${index}`}>
+                  {option}
+              </label>
+          </div>
+      ));
+  
+      const questionContainer = (
+          <div>
+              <h4>{currentQuestion + 1}. {question.question}</h4>
+              {options}
+          </div>
+      );
+  
+      // Render questionContainer using JSX
+      return questionContainer;
+  }, [currentQuestion]);
+  
+        
+    const startTimer = useCallback(() => {
+        setTimer(10);
+        const interval = setInterval(() => {
+        setTimer((prevTimer) => prevTimer - 1);
+        
+          if (timer === -1) {
+              clearInterval(interval);
+              nextQuestion();
+          }
+        }, 2000);
+        setTimerInterval(interval);
+    },[nextQuestion,timer]);
+        
+    const nextQuestion = useCallback(() => {
+        clearInterval(timerInterval);
+        setCurrentQuestion((prevQuestion) => prevQuestion + 1);
+        
+        if (currentQuestion < questions.length) {
+              loadQuestion();
+              startTimer();
+        } else {
+            clearInterval(timerInterval);
+            endQuiz();
+        }
+    },[currentQuestion,endQuiz,loadQuestion,startTimer,timerInterval]);
+        
+    const skipQuestion = () => {
+        clearInterval(timerInterval);
+        setCurrentQuestion((prevQuestion) => prevQuestion + 1);
+        
+        if (currentQuestion < questions.length) {
+            loadQuestion();
+            startTimer();
+          } else {
+             endQuiz();
+          }
+    };
+        
+    const handleNextButtonClick = () => {
+        const selectedAnswer = document.querySelector(
+            'input[name="answer options-outlined"]:checked'
+        )?.value;
+        const correctAnswer = questions[currentQuestion].answer;
+        
+        if (typeof selectedAnswer !== 'undefined') {
+            setUnattempted((prevUnattempted) => prevUnattempted - 1);
+        }
+        
+        if (selectedAnswer === correctAnswer) {
+          setScore((prevScore) => prevScore + 1);
+        }
+      
+        nextQuestion();
+    };
+        
+    useEffect(() => {
+      if (quizStarted) {
+        loadQuestion();
+        startTimer();
+      }
+    
+      return () => {
+        // Cleanup code (if needed) when the component unmounts or when quizStarted changes
+        clearInterval(timerInterval);
+      };
+    }, [quizStarted, currentQuestion, loadQuestion, startTimer, timerInterval]); // Dependency array includes variables that useEffect depends on
     
 
 
-function  Quiz() {
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [timer, setTimer] = useState(10);
-  const [timerInterval, setTimerInterval] = useState(null);
-  const [score, setScore] = useState(0);
-  const [quizStarted, setQuizStarted] = useState(false);
-  const [unattempted, setUnattempted] = useState(10);
-  const [showQuiz, setShowQuiz] = useState(true);
-  const [scoreVisible, setScoreVisible] = useState(false);
-  const [scoreInfo, setScoreInfo] = useState({
-    attemptedQuestions: 0,
-    score: 0,
-  });
-  const endQuiz = useCallback(() => {
-    clearInterval(timerInterval);
-    setTimer(-2);
 
-    // Hide unnecessary elements and display the score
-    setShowQuiz(false);
-    setScoreVisible(true);
-
-    // Calculate the number of attempted questions
-    const attemptedQuestions = 10 - unattempted;
-
-    // Update the UI with the score and attempted questions
-    setScoreInfo({
-      attemptedQuestions,
-      score,
-    });
-  },[score,timerInterval,unattempted]);
-  const nextQuestion = useCallback(() => {
-    clearInterval(timerInterval);
-    setCurrentQuestion((prevQuestion) => prevQuestion + 1);
-
-    if (currentQuestion < questions.length) {
-      loadQuestion();
-      startTimer();
-    } else {
-      endQuiz();
-    }
-  },[currentQuestion,endQuiz,loadQuestion,startTimer,timerInterval]);
-
-  const loadQuestion = useCallback(() => {
-    const question = questions[currentQuestion];
-    const questionContainer = document.getElementById('question-container');
-    questionContainer.innerHTML = ''; // Clear existing content
-  
-    // Add question heading
-    const questionHeading = document.createElement('h4');
-    questionHeading.textContent = `${currentQuestion + 1}. ${question.question}`;
-    questionContainer.appendChild(questionHeading);
-  
-    // Add radio buttons for options
-    for (let i = 0; i < question.options.length; i++) {
-      const optionDiv = document.createElement('div');
-      optionDiv.classList.add('form-check');
-  
-      const radioButton = document.createElement('input');
-      radioButton.type = 'radio';
-      radioButton.name = 'answer options-outlined';
-      radioButton.id = `option${i}`;
-      radioButton.value = i;
-  
-      const label = document.createElement('label');
-      label.htmlFor = `option${i}`;
-      label.classList.add('btn', 'btn-outline-success');
-      label.textContent = question.options[i];
-  
-      optionDiv.appendChild(radioButton);
-      optionDiv.appendChild(label);
-  
-      questionContainer.appendChild(optionDiv);
-    }
-  },[currentQuestion]);
-  
-
-  const startTimer = useCallback(() => {
-    setTimer(10); // Reset timer to 10 seconds
-  
-    const interval = setInterval(() => {
-      setTimer((prevTimer) => prevTimer - 1);
-  
-      if (timer === -1) {
-        clearInterval(interval);
-        nextQuestion(); // Move to the next question when the timer reaches -1
-      }
-    }, 1000);
-  
-    setTimerInterval(interval); // Save the interval ID in state for later clearing
-  },[nextQuestion,timer]);
-  
-
-  useEffect(() => {
-    if (quizStarted) {
-      loadQuestion();
-      startTimer();
-    }
-  }, [quizStarted, loadQuestion, startTimer]);
-
-  const startQuiz = () => {
-    setQuizStarted(true);
-  };
-
-  
-
-
-  
-
-  const handleNextButtonClick = () => {
-    const selectedAnswer = document.querySelector('input[name="answer options-outlined"]:checked')?.value;
-    const correctAnswer = questions[currentQuestion].answer;
-
-    if (typeof selectedAnswer !== 'undefined') {
-      setUnattempted((prevUnattempted) => prevUnattempted - 1);
-    }
-
-    if (selectedAnswer === correctAnswer) {
-      setScore((prevScore) => prevScore + 1);
-    }
-
-    nextQuestion();
-  };
-
-  const skipQuestion = () => {
-    clearInterval(timerInterval);
-    setCurrentQuestion((prevQuestion) => prevQuestion + 1);
-
-    if (currentQuestion < questions.length) {
-      loadQuestion();
-      startTimer();
-    } else {
-      // endQuiz();
-    }
-  };
-
-  return (
-    <div>
-      <Navbar />
-      <Coursebar />
-      {showQuiz && (
-        <QuizComponent
-          question={questions[currentQuestion].question}
-          options={questions[currentQuestion].options}
-          onOptionSelect={handleNextButtonClick}
-          onNextClick={nextQuestion}
-        />
-      )}
-      {scoreVisible && <ScoreComponent scoreInfo={scoreInfo} />}
+    return (
+      <div>
+        <div>
+            <Navbar />
+            <Coursebar />
+        </div>
+        <div className="preface-box text-center container mt-4" style={{ width: '50%' }}>
+          <div className="doublbox">
+            <h3>Welcome to the French Language Quiz</h3>
+            <br />
+            <br />
+            <div className="container mt-3">
+              <h6 style={{ color: 'red' }} className="font-weight-bold">
+                Before you start, please read the rules:
+              </h6>
+              <div className="container" style={{ width: '65%' }}>
+                <ol>
+                  <li>Each question has a 10-second timer.</li>
+                  <li>Choose the correct answer from the options.</li>
+                </ol>
+              </div>
+            </div>
+            <button id="start-quiz" className="btn btn-primary preface-button" onClick={startQuiz}>
+              Start Quiz
+            </button>
+          </div>
+        </div>
+        <div className="container mt-4 quizbox" id="quizbox" style={{ display: 'none' }}>
+          <div className="doublbox">
+            <div id="question-container"></div>
+            <div className="mt-3">
+              <span id="timer">{timer}</span> seconds remaining
+            </div>
+            <button id="next-button" className="btn btn-primary mt-3 btn-skip" onClick={handleNextButtonClick}>
+              Save & Next
+            </button>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <button id="skip-question" className="btn btn-secondary btn-next" onClick={skipQuestion}>
+              Skip
+            </button>
+            <div className="text-center mt-3">
+              <button id="end-quiz" className="btn btn-danger btn-next preface-button" onClick={endQuiz}>
+                End Quiz
+              </button>
+            </div>
+          </div>
+        </div>
+        <div className="text-center container mt-4" id="scorebox" style={{ width: '50%', display: showScorebox ? 'block' : 'none' }}>
+          <div className="doublbox">
+            <h3>Your Score</h3>
+            <br />
+            <div className="container mt-3">
+              <div className="container marksreport" id="marksreport" style={{ width: '65%' }}></div>
+            </div>
+          </div>
+        </div>
+        <div className="d-flex justify-content-center">
+          <img className="align-items-center" style={{ width: '30%', height: '30%' }} src={studentGivingExam} alt="" />
+        </div>
     </div>
-  );
-};
+    );
+    };
+        
+
+        
+
+
 
 
 export default Quiz;
