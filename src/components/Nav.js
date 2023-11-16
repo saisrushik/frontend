@@ -1,29 +1,35 @@
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { Link } from 'react-router-dom';
+//import Courses from "./Courses";
+
 
 function Nav(){
     return(
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-      <div class="container">
-          <a class="navbar-brand font-weight-bold" href="#">LanguaMaster</a>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav ml-auto medium-500">
-              <li class="nav-item active">
-                <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">Courses</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">Contact</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">Blog</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#"><button class="btn btn-info p-1">LOGIN/SIGN UP</button></a>
-              </li>
-            </ul>    
+      <nav className="navbar navbar-expand-lg navbar-light bg-light">
+        <div className="container">
+          <Link className="navbar-brand font-weight-bold" to="/">LinguaMaster</Link>
+            <div className="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul className="navbar-nav ml-auto medium-500">
+                  <li className="nav-item active">
+                    <Link className="nav-link" to="/">Home</Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link className="nav-link" to="/courses">Courses</Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link className="nav-link" to="/contact">Contact</Link>
+                  </li>
+                  <li className="nav-item">
+                    <a className="nav-link" href="https://youtube.com">Blog</a>
+                  </li>
+                  <li className="nav-item">
+                    <Link to="/login" className="nav-link">
+                          <button className="btn btn-info p-1">LOGIN/SIGN UP</button>
+                    </Link>
+                  </li>
+              </ul>    
+            </div>
         </div>
-      </div>
     </nav>
     )
 }
