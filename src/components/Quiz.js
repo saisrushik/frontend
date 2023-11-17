@@ -60,7 +60,7 @@ import studentGivingExam from '../images/student-giving-exam-4064797-3363987.png
 
 
 
-const Quiz = () => {
+function Quiz(){
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [timer, setTimer] = useState(10);
     const [timerInterval, setTimerInterval] = useState(null);
@@ -68,18 +68,6 @@ const Quiz = () => {
     const [quizStarted, setQuizStarted] = useState(false);
     const [unattempted, setUnattempted] = useState(10);
     const [showScorebox, setShowScorebox] = useState(false);
-        
-    const startQuiz = () => {
-        setQuizStarted(true);
-        loadQuestion();
-        startTimer();
-    };
-        
-    const endQuiz = useCallback(() => {
-        clearInterval(timerInterval);
-        setTimer(-2);
-        setShowScorebox(true);
-    },[timerInterval]);
         
     const loadQuestion = useCallback(() => {
       const question = questions[currentQuestion];
@@ -103,20 +91,30 @@ const Quiz = () => {
       // Render questionContainer using JSX
       return questionContainer;
   }, [currentQuestion]);
-  
+
+  const startTimer = useCallback(() => {
+    setTimer(10);
+    const interval = setInterval(() => {
+    setTimer((prevTimer) => prevTimer - 1);
+    
+      if (timer === -1) {
+          clearInterval(interval);
+      }
+    }, 2000);
+    setTimerInterval(interval);
+},[timer]);
+
+    const startQuiz = useCallback(() => {
+        setQuizStarted(true);
+        loadQuestion();
+        startTimer();
+    },[loadQuestion,startTimer]);
         
-    const startTimer = useCallback(() => {
-        setTimer(10);
-        const interval = setInterval(() => {
-        setTimer((prevTimer) => prevTimer - 1);
-        
-          if (timer === -1) {
-              clearInterval(interval);
-              nextQuestion();
-          }
-        }, 2000);
-        setTimerInterval(interval);
-    },[nextQuestion,timer]);
+    const endQuiz = useCallback(() => {
+        clearInterval(timerInterval);
+        setTimer(-2);
+        setShowScorebox(true);
+    },[timerInterval]);
         
     const nextQuestion = useCallback(() => {
         clearInterval(timerInterval);
@@ -161,6 +159,7 @@ const Quiz = () => {
     };
         
     useEffect(() => {
+
       if (quizStarted) {
         loadQuestion();
         startTimer();
@@ -170,10 +169,8 @@ const Quiz = () => {
         // Cleanup code (if needed) when the component unmounts or when quizStarted changes
         clearInterval(timerInterval);
       };
-    }, [quizStarted, currentQuestion, loadQuestion, startTimer, timerInterval]); // Dependency array includes variables that useEffect depends on
+    }, [quizStarted, currentQuestion, loadQuestion, startTimer, timerInterval]); 
     
-
-
 
     return (
       <div>
@@ -181,7 +178,7 @@ const Quiz = () => {
             <Navbar />
             <Coursebar />
         </div>
-        <div className="preface-box text-center container mt-4" style={{ width: '50%' }}>
+        <div className="preface-box text-center container mt-4" id="preface-box"style={{ width: '50%' }}>
           <div className="doublbox">
             <h3>Welcome to the French Language Quiz</h3>
             <br />
