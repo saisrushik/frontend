@@ -1,249 +1,316 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import React, { Component } from 'react';
 import Navbar from './Navbar';
 import Coursebar from './Coursebar';
-import '../quiz.css'; 
-import studentGivingExam from '../images/student-giving-exam-4064797-3363987.png';
 
-  const questions = [
-              {
-                  question: "What is 'hello' in French?",
-                  options: ["Bonjour", "Bonsoir", "Salut"],
-                  answer: 0
-              },
-              {
-                  question: "How do you say 'goodbye' in French?",
-                  options: ["Au revoir", "Adieu", "À bientôt"],
-                  answer: 0
-              },
-              {
-                  question: "What is 'thank you' in French?",
-                  options: ["Merci", "S'il vous plaît", "Excusez-moi"],
-                  answer: 0
-              },
-              {
-                  question: "How do you say 'yes' in French?",
-                  options: ["Oui", "Non", "Peut-être"],
-                  answer: 0
-              },
-              {
-                  question: "What is 'cat' in French?",
-                  options: ["Chien", "Chat", "Oiseau"],
-                  answer: 1
-              },
-              {
-                  question: "How do you say 'water' in French?",
-                  options: ["Feu", "Air", "Eau"],
-                  answer: 2
-              },
-              {
-                  question: "What is 'red' in French?",
-                  options: ["Bleu", "Vert", "Rouge"],
-                  answer: 2
-              },
-              {
-                  question: "How do you say 'book' in French?",
-                  options: ["Fleur", "Livre", "Maison"],
-                  answer: 1
-              },
-              {
-                  question: "What is 'one' in French?",
-                  options: ["Deux", "Un", "Trois"],
-                  answer: 1
-              },
-              {
-                  question: "How do you say 'please' in French?",
-                  options: ["Merci", "S'il vous plaît", "Excusez-moi"],
-                  answer: 1
-              }
-        ];
+class Quiz extends Component {
+  constructor(props) {
+    super(props);
 
-
-
-function Quiz(){
-    const [currentQuestion, setCurrentQuestion] = useState(0);
-    const [timer, setTimer] = useState(10);
-    const [timerInterval, setTimerInterval] = useState(null);
-    const [score, setScore] = useState(0);
-    const [quizStarted, setQuizStarted] = useState(false);
-    const [unattempted, setUnattempted] = useState(10);
-    const [showScorebox, setShowScorebox] = useState(false);
-        
-    const loadQuestion = useCallback(() => {
-      const question = questions[currentQuestion];
-  
-      const options = question.options.map((option, index) => (
-          <div key={index} className="form-check">
-              <input className="button-check" type="radio" name="answer options-outlined" id={`option${index}`} value={index} />
-              <label className="btn btn-outline-success" htmlFor={`option${index}`}>
-                  {option}
-              </label>
-          </div>
-      ));
-  
-      const questionContainer = (
-          <div>
-              <h4>{currentQuestion + 1}. {question.question}</h4>
-              {options}
-          </div>
-      );
-  
-      // Render questionContainer using JSX
-      return questionContainer;
-  }, [currentQuestion]);
-
-  const startTimer = useCallback(() => {
-    setTimer(10);
-    const interval = setInterval(() => {
-    setTimer((prevTimer) => prevTimer - 1);
+    this.state = {
+      questions: [
+        {
+            question: "What is 'hello' in French?",
+            options: ["Bonjour", "Bonsoir", "Salut"],
+            answer: 0
+        },
+        {
+            question: "How do you say 'goodbye' in French?",
+            options: ["Au revoir", "Adieu", "À bientôt"],
+            answer: 0
+        },
+        {
+            question: "What is 'thank you' in French?",
+            options: ["Merci", "S'il vous plaît", "Excusez-moi"],
+            answer: 0
+        },
+        {
+            question: "How do you say 'yes' in French?",
+            options: ["Oui", "Non", "Peut-être"],
+            answer: 0
+        },
+        {
+            question: "What is 'cat' in French?",
+            options: ["Chien", "Chat", "Oiseau"],
+            answer: 1
+        },
+        {
+            question: "How do you say 'water' in French?",
+            options: ["Feu", "Air", "Eau"],
+            answer: 2
+        },
+        {
+            question: "What is 'red' in French?",
+            options: ["Bleu", "Vert", "Rouge"],
+            answer: 2
+        },
+        {
+            question: "How do you say 'book' in French?",
+            options: ["Fleur", "Livre", "Maison"],
+            answer: 1
+        },
+        {
+            question: "What is 'one' in French?",
+            options: ["Deux", "Un", "Trois"],
+            answer: 1
+        },
+        {
+            question: "How do you say 'please' in French?",
+            options: ["Merci", "S'il vous plaît", "Excusez-moi"],
+            answer: 1
+        }
+    ],
     
-      if (timer === -1) {
-          clearInterval(interval);
-      }
-    }, 2000);
-    setTimerInterval(interval);
-},[timer]);
-
-    const startQuiz = useCallback(() => {
-        setQuizStarted(true);
-        loadQuestion();
-        startTimer();
-    },[loadQuestion,startTimer]);
-        
-    const endQuiz = useCallback(() => {
-        clearInterval(timerInterval);
-        setTimer(-2);
-        setShowScorebox(true);
-    },[timerInterval]);
-        
-    const nextQuestion = useCallback(() => {
-        clearInterval(timerInterval);
-        setCurrentQuestion((prevQuestion) => prevQuestion + 1);
-        
-        if (currentQuestion < questions.length) {
-              loadQuestion();
-              startTimer();
-        } else {
-            clearInterval(timerInterval);
-            endQuiz();
-        }
-    },[currentQuestion,endQuiz,loadQuestion,startTimer,timerInterval]);
-        
-    const skipQuestion = () => {
-        clearInterval(timerInterval);
-        setCurrentQuestion((prevQuestion) => prevQuestion + 1);
-        
-        if (currentQuestion < questions.length) {
-            loadQuestion();
-            startTimer();
-          } else {
-             endQuiz();
-          }
+      currentQuestion: 0,
+      timer: 10,
+      timerInterval: null,
+      score: 0,
+      quizStarted: false,
+      unattempted: 10
     };
-        
-    const handleNextButtonClick = () => {
-        const selectedAnswer = document.querySelector(
-            'input[name="answer options-outlined"]:checked'
-        )?.value;
-        const correctAnswer = questions[currentQuestion].answer;
-        
-        if (typeof selectedAnswer !== 'undefined') {
-            setUnattempted((prevUnattempted) => prevUnattempted - 1);
-        }
-        
-        if (selectedAnswer === correctAnswer) {
-          setScore((prevScore) => prevScore + 1);
-        }
+  }
+
+  startQuiz = () => {
+    this.setState({ quizStarted: true }, () => {
+      this.loadQuestion();
+      this.startTimer();
+    });
+  };
+  
+  endQuiz = () => {
+    const { timerInterval, score, unattempted, questions } = this.state;
+    clearInterval(timerInterval);
+  
+    
+    const attemptedQuestions = questions.length - unattempted;
+    const finalScore = score;
+  
+   
+  
+    this.setState({
+     currentQuestion: questions.length,
       
-        nextQuestion();
-    };
-        
-    useEffect(() => {
+    });
+  
+    
+    alert(`Quiz ended! Your final score: ${finalScore} out of ${attemptedQuestions}`);
+  };
+  
 
-      if (quizStarted) {
-        loadQuestion();
-        startTimer();
+  
+  loadQuestion = () => {
+    const { currentQuestion, questions } = this.state;
+  
+    if (currentQuestion < questions.length) {
+      const question = questions[currentQuestion];
+      return (
+        <div id="question-container">
+          <h4>{currentQuestion + 1}. {question.question}</h4>
+          {question.options.map((option, index) => (
+            <div className="form-check" key={index}>
+              <input
+                type="radio"
+                name={`question${currentQuestion}`} 
+                id={`option${index}`}
+                value={index}
+              />
+              <label className="btn btn-outline-success" htmlFor={`option${index}`}>
+                {option}
+              </label>
+            </div>
+          ))}
+        </div>
+      );
+    }
+  };
+  startTimer = () => {
+    this.setState({ timer: 10 }, () => {
+      const interval = setInterval(() => {
+        this.setState((prevState) => ({ timer: prevState.timer - 1 }), () => {
+          if (this.state.timer === 0) {
+            clearInterval(this.state.timerInterval);
+            this.nextQuestion();
+          }
+        });
+      }, 1000);
+      this.setState({ timerInterval: interval });
+    });
+  };
+  
+  nextQuestion = () => {
+    const { currentQuestion, questions, timerInterval, score, unattempted } = this.state;
+    clearInterval(timerInterval);
+    this.setState({ timer: 10 });
+  
+    const selectedAnswer = document.querySelector(`input[name="question${currentQuestion}"]:checked`);
+    if (selectedAnswer !== null) {
+      const selectedOption = selectedAnswer.value;
+  
+      const correctAnswer = questions[currentQuestion].answer;
+      if (selectedOption === correctAnswer) {
+        this.setState({ score: score + 1 });
       }
-    
-      return () => {
-        // Cleanup code (if needed) when the component unmounts or when quizStarted changes
-        clearInterval(timerInterval);
-      };
-    }, [quizStarted, currentQuestion, loadQuestion, startTimer, timerInterval]); 
-    
+      this.setState({ unattempted: unattempted - 1 });
+    }
+  
+    this.setState({ currentQuestion: currentQuestion + 1 }, () => {
+      if (currentQuestion < questions.length) {
+        this.loadQuestion();
+        this.startTimer();
+      } else {
+        this.endQuiz();
+      }
+    });
+  };
+  
+  
+  handleNextButtonClick = () => {
+    const selectedAnswer = document.querySelector(
+      "input[name='answer options-outlined']:checked"
+    )?.value;
+    const correctAnswer = this.state.questions[this.state.currentQuestion].answer;
+  
+    if (typeof selectedAnswer !== 'undefined') {
+      this.setState((prevState) => ({ unattempted: prevState.unattempted - 1 }));
+    }
+  
+    if (selectedAnswer === correctAnswer) {
+      this.setState((prevState) => ({ score: prevState.score + 1 }));
+    }
+  
+    this.nextQuestion();
+  };
+  
+  skipQuestion = () => {
+    clearInterval(this.state.timerInterval);
+    this.setState((prevState) => ({ currentQuestion: prevState.currentQuestion + 1 }), () => {
+      if (this.state.currentQuestion < this.state.questions.length) {
+        this.loadQuestion();
+        this.startTimer();
+      } else {
+        this.endQuiz();
+      }
+    });
+  };
+  render() {
+    const {  quizStarted,currentQuestion, unattempted, score,questions } = this.state;
 
     return (
       <div>
-        <div>
-            <Navbar />
-            <Coursebar />
-        </div>
-        <div className="preface-box text-center container mt-4" id="preface-box"style={{ width: '50%' }}>
-          <div className="doublbox">
-            <h3>Welcome to the French Language Quiz</h3>
-            <br />
-            <br />
-            <div className="container mt-3">
-              <h6 style={{ color: 'red' }} className="font-weight-bold">
-                Before you start, please read the rules:
-              </h6>
-              <div className="container" style={{ width: '65%' }}>
+        <Navbar/>
+        <Coursebar />
+        <style>
+          {`
+            body {
+              background-color: #A7D397;
+            }
+    
+            .quizbox {
+              background-color: #F5EEC8;
+              border-radius: 10px;
+              box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+              padding: 15px;
+              margin-top: 20px;
+            }
+            .doublbox {
+              background-color: #fff;
+              border-radius: 10px;
+              box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+              padding: 20px;
+            }
+    
+            .question-container {
+              background-color: #F5EEC8;
+              padding: 0px;
+              border: 1px solid #dee2e6;
+              border-radius: 5px;
+              box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            }
+    
+            .timer {
+              font-size: 24px;
+              font-weight: bold;
+            }
+    
+            .options label {
+              font-size: 18px;
+            }
+    
+            .btn-next, .btn-skip {
+              font-size: 18px;
+              margin-top: 20px;
+            }
+            .preface-box {
+              background-color: #F5EEC8;
+              color: #000;
+              border-radius: 5px;
+              padding: 15px;
+              margin-top: 20px;
+            }
+    
+            .preface-button {
+              font-size: 20px;
+            }
+          `}
+        </style>
+        {quizStarted ? (
+          currentQuestion >= questions.length ? (
+            <div className="text-center container mt-4" id="scorebox" style={{ width: '50%', display: 'block' }}>
+              <h3>Your Score</h3>
+              <div className="container marksreport" id="marksreport" style={{ width: '65%' }}>
+                <h6>Attempted Questions: {this.state.questions.length - unattempted}</h6>
+                <h6>Your Score: {score}</h6>
+              </div>
+            </div>
+          ) : (
+            <div className="container mt-4 quizbox" id="quizbox">
+              <div className="doublbox">
+                {this.loadQuestion()}
+              </div>
+              <div>
+
+                <div>
+                  <p>Timer: {this.state.timer}</p>
+                  <button className="btn btn-primary mt-3 btn-skip"  onClick={this.nextQuestion}>Save & Next</button>
+                  <button className='btn btn-secondary btn-next' onClick={this.skipQuestion}>Skip Question</button>
+                </div>
+                <button onClick={this.endQuiz} className="btn btn-danger btn-next preface-button">End Quiz</button>
+              </div>
+            </div>
+          )
+        ) : (
+          <div className="preface-box text-center container mt-4" style={{ width: '50%' }}>
+            <div className="doublbox">
+              <h3>Welcome to the French Language Quiz</h3>
+              <div>
+                <h6 style={{ color: 'red' }} className="font-weight-bold">
+                  Before you start, please read the rules:
+                </h6>
                 <ol>
                   <li>Each question has a 10-second timer.</li>
                   <li>Choose the correct answer from the options.</li>
                 </ol>
               </div>
-            </div>
-            <button id="start-quiz" className="btn btn-primary preface-button" onClick={startQuiz}>
-              Start Quiz
-            </button>
-          </div>
-        </div>
-        <div className="container mt-4 quizbox" id="quizbox" style={{ display: 'none' }}>
-          <div className="doublbox">
-            <div id="question-container"></div>
-            <div className="mt-3">
-              <span id="timer">{timer}</span> seconds remaining
-            </div>
-            <button id="next-button" className="btn btn-primary mt-3 btn-skip" onClick={handleNextButtonClick}>
-              Save & Next
-            </button>
-            &nbsp;&nbsp;&nbsp;&nbsp;
-            <button id="skip-question" className="btn btn-secondary btn-next" onClick={skipQuestion}>
-              Skip
-            </button>
-            <div className="text-center mt-3">
-              <button id="end-quiz" className="btn btn-danger btn-next preface-button" onClick={endQuiz}>
-                End Quiz
+              <div>
+                <form className="shadow" style={{margin: "5%", padding:"5%"}}>
+                    <div className="form-outline mb-2" >
+                        <label className="form-label" for="form3Example3">Enter Registration Number</label>
+                        <input type="text" id="RegsNO" className="form-control form-control-lg" placeholder="Enter registration number" />
+                    </div>
+                </form>
+              </div>
+              <button onClick={this.startQuiz} className="btn btn-primary preface-button">
+                Start Quiz
               </button>
             </div>
           </div>
-        </div>
-        <div className="text-center container mt-4" id="scorebox" style={{ width: '50%', display: showScorebox ? 'block' : 'none' }}>
-          <div className="doublbox">
-            <h3>Your Score</h3>
-            <br />
-            <div className="container mt-3">
-              <div className="container marksreport" id="marksreport" style={{ width: '65%' }}></div>
-            </div>
-          </div>
-        </div>
-        <div className="d-flex justify-content-center">
-          <img className="align-items-center" style={{ width: '30%', height: '30%' }} src={studentGivingExam} alt="" />
-        </div>
-    </div>
+        )}
+      </div>
     );
-    };
-        
-
-        
-
-
-
+    
+}
+  
+}
 
 export default Quiz;
-
-
-
 
 
