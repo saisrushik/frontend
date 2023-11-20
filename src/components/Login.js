@@ -1,8 +1,9 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import loginImg from "../images/homepage-img.png";
 import Navbar from './Navbar';
-import { Link } from 'react-router-dom';
-
+import { Link,useNavigate  } from 'react-router-dom';
+import { useState } from 'react';
+import Axios from 'axios';
 
 
 function Login(){
@@ -24,6 +25,22 @@ function Login(){
 }
 `
 */
+const [email,setEmail] = useState();
+const [pass,setPass] = useState();
+const navigate = useNavigate();
+
+const handleSubmit = (e) => {
+    e.preventDefault()
+    Axios.post('http://localhost:4000/studentRoute/login',{email,pass})
+    .then(result =>{
+        console.log(result)
+        if(result.status === 200){
+            navigate('/courses')
+        }
+    })
+    .catch(err => console.log(err))
+}
+
     return(
         <div>
             <Navbar />
@@ -33,14 +50,14 @@ function Login(){
                         <img src={loginImg} className="img-fluid" alt="" />
                     </div>   
                     <div className="col-md-8 col-lg-6 col-xl-6 offset-xl-1"  >
-                        <form className="shadow" style={{margin: "10%", padding:"5%"}}>
+                        <form onSubmit={handleSubmit} className="shadow" style={{margin: "10%", padding:"5%"}}>
                             <div className="form-outline mb-4" >
                                 <label className="form-label" for="form3Example3">Email address</label>
-                                <input type="email" id="form3Example3" className="form-control form-control-lg" placeholder="Enter a valid email address" />
+                                <input onChange={(e) => setEmail(e.target.value)} type="email" id="form3Example3" className="form-control form-control-lg" placeholder="Enter a valid email address" />
                             </div>
                             <div className="form-outline mb-3">
                                 <label className="form-label" for="form3Example4">Password</label>
-                                <input type="password" id="form3Example4" className="form-control form-control-lg" placeholder="Enter password" />
+                                <input onChange={(e) => setPass(e.target.value)} type="password" id="form3Example4" className="form-control form-control-lg" placeholder="Enter password" />
                             </div>
                             <div className="d-flex justify-content-between align-items-center">
                                 <div className="form-check mb-0">
